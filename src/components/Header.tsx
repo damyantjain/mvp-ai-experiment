@@ -39,13 +39,13 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-20 border-b bg-white/70 backdrop-blur">
+    <header className="sticky top-0 z-20 border-b bg-gray-900 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between p-3">
         <Link href="/" className="font-semibold">AI Experimentation MVP</Link>
         <div className="flex items-center gap-3">
           {userEmail ? (
             <>
-              <span className="text-sm text-gray-600">{userEmail}</span>
+              <span className="text-sm text-gray-400">{userEmail}</span>
               <button onClick={onSignOut} className="rounded-md border px-3 py-1 text-sm">
                 Sign out
               </button>
