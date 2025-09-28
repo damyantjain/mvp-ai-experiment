@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 type Usage = { prompt_tokens: number; completion_tokens: number; total_tokens: number };
-type Result = { model: string; text: string; latency_ms: number; usage?: Usage; error?: string };
+type Result = { model: string; text: string; latency_ms: number; usage?: Usage; cost_usd?: number; error?: string };
 type RunResponse = { results: Result[] } | { error: string };
 
 const AVAILABLE_MODELS = [
@@ -99,6 +99,7 @@ export default function RunnerPage() {
                   <th className="p-2 text-left border">Model</th>
                   <th className="p-2 text-left border">Latency (ms)</th>
                   <th className="p-2 text-left border">Prompt / Completion / Total tokens</th>
+                  <th className="p-2 text-left border">Cost (USD)</th>
                 </tr>
               </thead>
               <tbody>
@@ -111,10 +112,23 @@ export default function RunnerPage() {
                         ? `${r.usage.prompt_tokens} / ${r.usage.completion_tokens} / ${r.usage.total_tokens}`
                         : '—'}
                     </td>
+                    <td className="p-2 border">{typeof r.cost_usd === 'number' ? `$${r.cost_usd.toFixed(4)}` : '—'}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+
+            {results.length > 0 && (
+                <div className="text-sm">
+                    Total cost:{' '}
+                    <strong>
+                    $
+                    {results
+                        .reduce((sum, r) => sum + (r.cost_usd ?? 0), 0)
+                        .toFixed(4)}
+                    </strong>
+                </div>
+            )}
           </div>
 
           {results.map((r) => (
