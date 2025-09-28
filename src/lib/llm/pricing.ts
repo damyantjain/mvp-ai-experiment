@@ -4,6 +4,10 @@ const PRICES: Record<string, Price> = {
   // NOTE: prices here are illustrative; update to current vendor pricing when you go live.
   'gpt-4o-mini': { inK: 0.15, outK: 0.60 }, // $0.15 / $0.60 per 1K
   'gpt-4o':      { inK: 5.00, outK: 15.00 }, // $5.00 / $15.00 per 1K
+  
+  // TODO: Update with actual Mistral pricing from their docs
+  'mistral-small': { inK: 0.20, outK: 0.60 }, // Placeholder pricing
+  'mistral-large': { inK: 2.00, outK: 6.00 }, // Placeholder pricing
 };
 
 export type Usage = { prompt_tokens: number; completion_tokens: number; total_tokens: number };

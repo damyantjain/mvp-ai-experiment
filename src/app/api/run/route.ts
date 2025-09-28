@@ -4,7 +4,9 @@ export const runtime = 'nodejs';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { callOpenAIViaHelicone, type LLMResult } from '@/lib/llm/openaiFetch';
+import { callMistralViaHelicone } from '@/lib/llm/mistralFetch';
 import { estimateCostUSD, type Usage } from '@/lib/llm/pricing';
+import { withTimeout } from '@/lib/utils';
 
 type RunRequest = {
   prompt: string;
@@ -35,22 +37,6 @@ type RunResponse = {
 type Ok = { model: string; ok: true; text: string; latency_ms: number; usage?: Usage };
 type Err = { model: string; ok: false; text: ''; latency_ms: 0; error: string };
 
-function withTimeout<T>(p: Promise<T>, ms = 30_000): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const t = setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms);
-    p.then(
-      (v) => {
-        clearTimeout(t);
-        resolve(v);
-      },
-      (e) => {
-        clearTimeout(t);
-        reject(e);
-      }
-    );
-  });
-}
-
 export async function POST(req: Request) {
   try {
     // 1) Auth: who is calling?
@@ -69,17 +55,31 @@ export async function POST(req: Request) {
     // 3) Fan out calls in parallel (per model)
     const calls: Promise<Ok | Err>[] = models.map(async (model): Promise<Ok | Err> => {
     try {
-        const r: LLMResult = await withTimeout(
-        callOpenAIViaHelicone({
+        // Route to appropriate provider based on model prefix
+        let llmCall: Promise<LLMResult>;
+        if (model.startsWith('gpt-')) {
+          llmCall = callOpenAIViaHelicone({
             model,
             userId: user.id,
             messages: [
-            { role: 'system', content: 'You are a concise assistant.' },
-            { role: 'user', content: prompt },
+              { role: 'system', content: 'You are a concise assistant.' },
+              { role: 'user', content: prompt },
             ],
-        }),
-        30_000
-        );
+          });
+        } else if (model.startsWith('mistral-')) {
+          llmCall = callMistralViaHelicone({
+            model,
+            userId: user.id,
+            messages: [
+              { role: 'system', content: 'You are a concise assistant.' },
+              { role: 'user', content: prompt },
+            ],
+          });
+        } else {
+          throw new Error(`Unsupported model prefix: ${model}`);
+        }
+
+        const r: LLMResult = await withTimeout(llmCall, 30_000);
 
         return {
         model,
