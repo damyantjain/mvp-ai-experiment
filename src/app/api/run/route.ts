@@ -135,19 +135,44 @@ export async function POST(req: Request) {
       }
     }
 
-    const { error: dbErr } = await supabase.from('runs').insert({
-      user_id: user.id,
-      prompt,
-      models,
-      metrics,
-    });
-    if (dbErr) {
-      // Not fatal for the client; log and still return results
-      // (Sentry will capture if configured)
-      console.error('Failed to save run:', dbErr.message);
+    // 4) Save the run row first (to get run_id)
+    const { data: inserted, error: dbErr } = await supabase
+    .from('runs')
+    .insert({
+        user_id: user.id,
+        prompt,
+        models,
+        metrics,
+    })
+    .select('id')   // <-- return the id of the inserted row
+    .single();
+
+    if (dbErr || !inserted?.id) {
+        console.error('Failed to save run:', dbErr?.message);
+        // Not fatal; still return the results to the client
+        } else {
+        // 4b) Save per-model outputs for this run
+        const rows = results
+            .filter(r => !r.error && r.text)
+            .map(r => ({
+            run_id: inserted.id,
+            user_id: user.id,   // RLS check
+            model: r.model,
+            output: r.text,
+            }));
+
+        if (rows.length > 0) {
+            const { error: outErr } = await supabase.from('run_outputs').insert(rows);
+            if (outErr) {
+            console.error('Failed to save outputs:', outErr.message);
+            // Not fatal; keep responding with results
+            }
+        }
     }
 
+    // 5) Respond
     return NextResponse.json({ results } satisfies RunResponse);
+
   } catch (err: unknown) {
     const message =
       err instanceof Error ? err.message : typeof err === 'string' ? err : JSON.stringify(err);
