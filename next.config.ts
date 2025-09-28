@@ -11,7 +11,7 @@ export default withSentryConfig(nextConfig, {
 
   org: "damyant",
 
-  project: "mvp-ai-experiment",
+  project: "coralcake",
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,

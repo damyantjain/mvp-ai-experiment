@@ -41,7 +41,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-20 border-b bg-gray-900 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between p-3">
-        <Link href="/" className="font-semibold">AI Experimentation MVP</Link>
+        <Link href="/" className="font-semibold">CoralCake</Link>
         <div className="flex items-center gap-3">
           {userEmail ? (
             <>
