@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
-        <meta httpEquiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://oai.helicone.ai https://mistral.helicone.ai https://js.sentry-cdn.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://oai.helicone.ai https://mistral.helicone.ai https://*.supabase.co https://*.sentry.io; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self';" />
+        <meta httpEquiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://oai.helicone.ai https://mistral.helicone.ai; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://oai.helicone.ai https://mistral.helicone.ai https://*.supabase.co https://*.sentry.io; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self';" />
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body>
