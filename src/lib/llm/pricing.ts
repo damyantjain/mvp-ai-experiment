@@ -7,7 +7,6 @@ const PRICES: Record<string, Price> = {
   
   // TODO: Update with actual Mistral pricing from their docs
   'mistral-small': { inK: 0.20, outK: 0.60 }, // Placeholder pricing
-  'mistral-large': { inK: 2.00, outK: 6.00 }, // Placeholder pricing
 };
 
 export type Usage = { prompt_tokens: number; completion_tokens: number; total_tokens: number };
