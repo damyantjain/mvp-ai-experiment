@@ -39,14 +39,14 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-20 border-b bg-gray-900 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between p-3">
-        <Link href="/" className="font-semibold">CoralCake</Link>
+    <header className="sticky top-0 z-20 border-b bg-white backdrop-blur shadow-sm">
+      <div className="mx-auto flex max-w-6xl items-center justify-between p-3">
+        <Link href="/" className="font-semibold text-gray-900">CoralCake</Link>
         <div className="flex items-center gap-3">
           {userEmail ? (
             <>
-              <span className="text-sm text-gray-400">{userEmail}</span>
-              <button onClick={onSignOut} className="rounded-md border px-3 py-1 text-sm">
+              <span className="text-sm text-gray-600">{userEmail}</span>
+              <button onClick={onSignOut} className="rounded-md border border-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-50">
                 Sign out
               </button>
             </>
@@ -58,11 +58,11 @@ export default function Header() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@email.com"
-                className="rounded-md border px-2 py-1 text-sm"
+                className="rounded-md border border-gray-300 px-2 py-1 text-sm text-gray-900"
               />
               <button
                 disabled={loading}
-                className="rounded-md border px-3 py-1 text-sm disabled:opacity-50"
+                className="rounded-md border border-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
               >
                 {loading ? 'Sending…' : 'Send link'}
               </button>

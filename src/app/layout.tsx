@@ -9,7 +9,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <AuthSync />
         <Header />
-        <main className="mx-auto max-w-5xl p-4">{children}</main>
+        <main>{children}</main>
       </body>
     </html>
   );
