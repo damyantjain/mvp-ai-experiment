@@ -82,7 +82,7 @@ export default function RunnerPage() {
                 onChange={(e) => setPrompt(e.target.value)}
                 rows={6}
                 placeholder="Type a prompt to compare models…"
-                className="w-full rounded-lg border border-gray-300 p-4 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
+                className="w-full rounded-lg border border-gray-300 p-4 text-sm duration-200 text-gray-900"
               />
             </div>
             
