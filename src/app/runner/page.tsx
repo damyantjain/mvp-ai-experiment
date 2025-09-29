@@ -9,6 +9,7 @@ type RunResponse = { results: Result[] } | { error: string };
 const AVAILABLE_MODELS = [
   { id: 'gpt-4o-mini', label: 'OpenAI: gpt-4o-mini' },
   { id: 'gpt-4o', label: 'OpenAI: gpt-4o' },
+  { id: 'mistral-small', label: 'Mistral: mistral-small' },
 ];
 
 export default function RunnerPage() {
