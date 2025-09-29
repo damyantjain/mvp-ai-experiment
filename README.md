@@ -10,7 +10,6 @@ A Next.js + Supabase app for running prompts across LLMs and comparing latency, 
 
 ### Mistral
 - `mistral-small`
-- `mistral-large`
 
 ## Setup
 
