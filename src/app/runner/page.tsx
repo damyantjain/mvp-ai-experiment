@@ -54,100 +54,157 @@ export default function RunnerPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-semibold">Prompt Runner</h1>
-
-      <form onSubmit={onRun} className="space-y-2">
-        <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          rows={5}
-          placeholder="Type a prompt to compare models…"
-          className="w-full rounded border p-2 text-sm"
-        />
-        <div className="flex flex-wrap gap-3">
-          {AVAILABLE_MODELS.map((m) => (
-            <label key={m.id} className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={selected.includes(m.id)}
-                onChange={() => toggleModel(m.id)}
-              />
-              {m.label}
-            </label>
-          ))}
-        </div>
-        <button
-          className="rounded border px-3 py-1 text-sm disabled:opacity-50"
-          disabled={loading}
-        >
-          {loading ? 'Running…' : 'Run'}
-        </button>
-      </form>
-
-      {msg && (
-        <div className="text-sm text-amber-700 bg-amber-50 px-3 py-2 rounded">
-          {msg}
-        </div>
-      )}
-
-      {results.length > 0 && (
-        <div className="space-y-3">
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm border">
-              <thead className="bg-gray-900">
-                <tr>
-                  <th className="p-2 text-left border">Model</th>
-                  <th className="p-2 text-left border">Latency (ms)</th>
-                  <th className="p-2 text-left border">Prompt / Completion / Total tokens</th>
-                  <th className="p-2 text-left border">Cost (USD)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {results.map((r) => (
-                  <tr key={r.model} className="align-top">
-                    <td className="p-2 border font-medium">{r.model}</td>
-                    <td className="p-2 border">{r.latency_ms || '—'}</td>
-                    <td className="p-2 border">
-                      {r.usage
-                        ? `${r.usage.prompt_tokens} / ${r.usage.completion_tokens} / ${r.usage.total_tokens}`
-                        : '—'}
-                    </td>
-                    <td className="p-2 border">{typeof r.cost_usd === 'number' ? `$${r.cost_usd.toFixed(4)}` : '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {results.length > 0 && (
-                <div className="text-sm">
-                    Total cost:{' '}
-                    <strong>
-                    $
-                    {results
-                        .reduce((sum, r) => sum + (r.cost_usd ?? 0), 0)
-                        .toFixed(4)}
-                    </strong>
-                </div>
-            )}
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-16 sm:py-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
+              LLM Prompt <span className="text-orange-400">Runner</span>
+            </h1>
+            <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto">
+              Test your prompts across multiple language models and compare their performance in real-time.
+            </p>
           </div>
-
-          {results.map((r) => (
-            <div key={r.model} className="border rounded p-3">
-              <div className="text-sm font-medium mb-2">{r.model}</div>
-              {r.error ? (
-                <div className="text-sm text-red-700 bg-red-50 p-2 rounded">
-                  {r.error}
-                </div>
-              ) : (
-                <pre className="text-sm whitespace-pre-wrap">
-                  {r.text || '(no text)'}
-                </pre>
-              )}
-            </div>
-          ))}
         </div>
-      )}
+      </section>
+
+      {/* Main Content */}
+      <section className="py-12 sm:py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <form onSubmit={onRun} className="space-y-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-3">
+                Enter Your Prompt
+              </label>
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                rows={6}
+                placeholder="Type a prompt to compare models…"
+                className="w-full rounded-lg border border-gray-300 p-4 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-3">
+                Select Models to Compare
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {AVAILABLE_MODELS.map((m) => (
+                  <label key={m.id} className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(m.id)}
+                      onChange={() => toggleModel(m.id)}
+                      className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+                    />
+                    <span className="text-sm font-medium text-gray-900">{m.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            
+            <button
+              type="submit"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading}
+            >
+              {loading ? 'Running…' : 'Run Comparison'}
+            </button>
+          </form>
+
+          {msg && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <div className="text-sm text-amber-800 font-medium">{msg}</div>
+            </div>
+          )}
+
+          {results.length > 0 && (
+            <div className="space-y-8 mt-8">
+              {/* Results Summary */}
+              <div className="bg-gray-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Summary</h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900">Model</th>
+                        <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900">Latency</th>
+                        <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900">Tokens</th>
+                        <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900">Cost</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {results.map((r) => (
+                        <tr key={r.model} className="hover:bg-white">
+                          <td className="py-3 px-4 text-sm font-medium text-gray-900">{r.model}</td>
+                          <td className="py-3 px-4 text-sm text-gray-600">
+                            {r.latency_ms ? `${r.latency_ms}ms` : '—'}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-gray-600">
+                            {r.usage
+                              ? `${r.usage.prompt_tokens} / ${r.usage.completion_tokens} / ${r.usage.total_tokens}`
+                              : '—'}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-gray-600">
+                            {typeof r.cost_usd === 'number' ? `$${r.cost_usd.toFixed(4)}` : '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {results.length > 0 && (
+                  <div className="mt-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <div className="text-sm text-orange-800">
+                      <span className="font-semibold">Total Cost:</span>{' '}
+                      <span className="font-bold">
+                        ${results.reduce((sum, r) => sum + (r.cost_usd ?? 0), 0).toFixed(4)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Detailed Responses */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Model Responses</h3>
+                <div className="grid gap-6">
+                  {results.map((r) => (
+                    <div key={r.model} className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow duration-200">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-sm font-semibold text-gray-900">{r.model}</h4>
+                        {r.error ? (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            Error
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Success
+                          </span>
+                        )}
+                      </div>
+                      {r.error ? (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                          <div className="text-sm text-red-700">{r.error}</div>
+                        </div>
+                      ) : (
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <pre className="text-sm whitespace-pre-wrap text-gray-700 leading-relaxed">
+                            {r.text || '(no text)'}
+                          </pre>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
