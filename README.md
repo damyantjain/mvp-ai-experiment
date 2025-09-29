@@ -17,8 +17,6 @@ Set up environment variables via Doppler:
 - `OPENAI_API_KEY`
 - `MISTRAL_API_KEY` 
 - `HELICONE_API_KEY`
-- `SENTRY_DSN` - Sentry DSN for server-side error tracking
-- `NEXT_PUBLIC_SENTRY_DSN` - Sentry DSN for client-side error tracking (can be the same as SENTRY_DSN)
 
 Run development server:
 ```bash

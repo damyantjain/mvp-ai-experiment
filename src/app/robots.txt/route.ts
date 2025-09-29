@@ -13,7 +13,6 @@ Disallow: /api/
 Disallow: /auth-debug
 Disallow: /runs-debug
 Disallow: /provider-test
-Disallow: /sentry-example-page
 
 Sitemap: https://coralcake.vercel.app/sitemap.xml`;
 
