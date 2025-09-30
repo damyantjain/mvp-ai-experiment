@@ -1,14 +1,18 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 
 export default function AuthCallback() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     (async () => {
+      // Get the intended redirect destination from query params
+      const redirectTo = searchParams.get('redirectTo') || '/';
+
       // Parse tokens from the URL hash fragment: #access_token=...&refresh_token=...
       const hash = window.location.hash.startsWith('#')
         ? window.location.hash.substring(1)
@@ -46,10 +50,10 @@ export default function AuthCallback() {
         return;
       }
 
-      // 3) Go home
-      router.replace('/');
+      // 3) Redirect to intended destination
+      router.replace(redirectTo);
     })();
-  }, [router]);
+  }, [router, searchParams]);
 
   return <p className="p-4 text-sm">Signing you in…</p>;
 }
