@@ -52,6 +52,41 @@ function AuthCallbackComponent() {
 
       // 3) Redirect to intended destination
       router.replace(redirectTo);
+
+      // 4) Signal to other tabs that auth succeeded and close this tab if it was opened from another tab
+      try {
+        // Signal success to other tabs via localStorage
+        localStorage.setItem('coralcake_auth_success', JSON.stringify({
+          timestamp: Date.now(),
+          redirectTo,
+          userEmail: access_token // We'll extract user info from token if needed
+        }));
+
+        // Clean up localStorage after 15 seconds to prevent stale data
+        setTimeout(() => {
+          try {
+            localStorage.removeItem('coralcake_auth_success');
+          } catch {
+            // Ignore cleanup errors
+          }
+        }, 15000);
+
+        // Try to communicate with opener window (if this tab was opened by clicking magic link)
+        if (window.opener && !window.opener.closed) {
+          window.opener.postMessage({
+            type: 'CORALCAKE_AUTH_SUCCESS',
+            redirectTo
+          }, window.location.origin);
+
+          // Close this tab since the original tab will handle the redirect
+          setTimeout(() => {
+            window.close();
+          }, 1000);
+        }
+      } catch (error) {
+        // Ignore localStorage/postMessage errors - auth still succeeded
+        console.log('Cross-tab communication failed (non-critical):', error);
+      }
     })();
   }, [router, searchParams]);
 

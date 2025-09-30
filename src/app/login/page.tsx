@@ -32,7 +32,43 @@ function LoginPageComponent() {
         router.replace(redirectTo);
       }
     });
-    return () => sub.subscription.unsubscribe();
+
+    // Listen for cross-tab auth success messages
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+
+      if (event.data?.type === 'CORALCAKE_AUTH_SUCCESS') {
+        // Auth succeeded in another tab, redirect this tab
+        const targetUrl = event.data.redirectTo || '/';
+        router.replace(targetUrl);
+      }
+    };
+
+    // Listen for localStorage changes (alternative cross-tab communication)
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'coralcake_auth_success' && event.newValue) {
+        try {
+          const authData = JSON.parse(event.newValue);
+          // Only act on recent auth events (within last 10 seconds)
+          if (Date.now() - authData.timestamp < 10000) {
+            // Clean up the localStorage item
+            localStorage.removeItem('coralcake_auth_success');
+            router.replace(authData.redirectTo || '/');
+          }
+        } catch (error) {
+          console.log('Failed to parse auth success data:', error);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      sub.subscription.unsubscribe();
+      window.removeEventListener('message', handleMessage);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [router, redirectTo]);
 
   async function onSendLink(e: React.FormEvent) {
