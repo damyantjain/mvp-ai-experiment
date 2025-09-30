@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function Header() {
   const [email, setEmail] = useState('');
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     // get current session user (if any)
@@ -24,9 +26,13 @@ export default function Header() {
     e.preventDefault();
     setLoading(true);
     setMsg(null);
+    const callbackUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`;
+    const redirectTo = pathname && pathname !== '/' ? pathname : '/';
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback` }
+      options: { 
+        emailRedirectTo: `${callbackUrl}?redirectTo=${encodeURIComponent(redirectTo)}`
+      }
     });
     setLoading(false);
     setMsg(error ? error.message : 'Check your email for the sign-in link.');

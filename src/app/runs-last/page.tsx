@@ -6,39 +6,11 @@ export const runtime = 'nodejs';
 export default async function LastRunPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  
+  // Middleware should have already redirected if not authenticated,
+  // but we keep this as a safety check
   if (!user) {
-    return (
-      <div className="min-h-screen">
-        {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-16 sm:py-20">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
-                Last <span className="text-orange-400">Run Results</span>
-              </h1>
-              <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto">
-                View your most recent LLM comparison results and model responses.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Content */}
-        <section className="py-12 sm:py-16 bg-white">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center py-12">
-              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Authentication Required</h3>
-              <p className="text-gray-600">Please sign in to view your last run results.</p>
-            </div>
-          </div>
-        </section>
-      </div>
-    );
+    return null;
   }
 
   // fetch most recent run
