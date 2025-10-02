@@ -1,75 +1,15 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 
 function LoginPageComponent() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirectTo') || '/';
-
-  useEffect(() => {
-    // Check if already logged in
-    supabase.auth.getUser().then(({ data }) => {
-      const currentUser = data.user?.email ?? null;
-      setUserEmail(currentUser);
-      if (currentUser) {
-        // Already logged in, redirect to intended destination
-        router.replace(redirectTo);
-      }
-    });
-
-    // Listen for auth changes
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      const newUserEmail = session?.user?.email ?? null;
-      setUserEmail(newUserEmail);
-      if (newUserEmail) {
-        router.replace(redirectTo);
-      }
-    });
-
-    // Listen for cross-tab auth success messages
-    const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return;
-
-      if (event.data?.type === 'CORALCAKE_AUTH_SUCCESS') {
-        // Auth succeeded in another tab, redirect this tab
-        const targetUrl = event.data.redirectTo || '/';
-        router.replace(targetUrl);
-      }
-    };
-
-    // Listen for localStorage changes (alternative cross-tab communication)
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'coralcake_auth_success' && event.newValue) {
-        try {
-          const authData = JSON.parse(event.newValue);
-          // Only act on recent auth events (within last 10 seconds)
-          if (Date.now() - authData.timestamp < 10000) {
-            // Clean up the localStorage item
-            localStorage.removeItem('coralcake_auth_success');
-            router.replace(authData.redirectTo || '/');
-          }
-        } catch (error) {
-          console.log('Failed to parse auth success data:', error);
-        }
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      sub.subscription.unsubscribe();
-      window.removeEventListener('message', handleMessage);
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, [router, redirectTo]);
 
   async function onSendLink(e: React.FormEvent) {
     e.preventDefault();
@@ -91,18 +31,6 @@ function LoginPageComponent() {
       setMsg('Check your email for the sign-in link.');
       setEmail('');
     }
-  }
-
-  // If already logged in, show loading state while redirecting
-  if (userEmail) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Redirecting...</p>
-        </div>
-      </div>
-    );
   }
 
   return (
