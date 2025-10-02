@@ -53,6 +53,40 @@ export default function RunnerPage() {
     }
   }
 
+  function exportResults(format: 'json' | 'csv') {
+    if (results.length === 0) return;
+    
+    if (format === 'json') {
+      const blob = new Blob([JSON.stringify({ prompt, results }, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `llm-comparison-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } else {
+      const headers = ['Model', 'Latency (ms)', 'Prompt Tokens', 'Completion Tokens', 'Total Tokens', 'Cost (USD)', 'Response Length', 'Status'];
+      const rows = results.map(r => [
+        r.model,
+        r.latency_ms || '',
+        r.usage?.prompt_tokens || '',
+        r.usage?.completion_tokens || '',
+        r.usage?.total_tokens || '',
+        r.cost_usd?.toFixed(4) || '',
+        r.text?.length || '',
+        r.error ? 'Error' : 'Success'
+      ]);
+      const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `llm-comparison-${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  }
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -122,6 +156,28 @@ export default function RunnerPage() {
 
           {results.length > 0 && (
             <div className="space-y-8 mt-8">
+              {/* Export Buttons */}
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => exportResults('csv')}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Export CSV
+                </button>
+                <button
+                  onClick={() => exportResults('json')}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Export JSON
+                </button>
+              </div>
+
               {/* Results Summary */}
               <div className="bg-gray-50 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Summary</h3>
@@ -133,6 +189,7 @@ export default function RunnerPage() {
                         <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900">Latency</th>
                         <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900">Tokens</th>
                         <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900">Cost</th>
+                        <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900">Response Length</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -150,6 +207,9 @@ export default function RunnerPage() {
                           <td className="py-3 px-4 text-sm text-gray-600">
                             {typeof r.cost_usd === 'number' ? `$${r.cost_usd.toFixed(4)}` : '—'}
                           </td>
+                          <td className="py-3 px-4 text-sm text-gray-600">
+                            {r.text ? `${r.text.length} chars` : '—'}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -157,12 +217,30 @@ export default function RunnerPage() {
                 </div>
                 
                 {results.length > 0 && (
-                  <div className="mt-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
-                    <div className="text-sm text-orange-800">
-                      <span className="font-semibold">Total Cost:</span>{' '}
-                      <span className="font-bold">
-                        ${results.reduce((sum, r) => sum + (r.cost_usd ?? 0), 0).toFixed(4)}
-                      </span>
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                      <div className="text-sm text-orange-800">
+                        <span className="font-semibold">Total Cost:</span>{' '}
+                        <span className="font-bold">
+                          ${results.reduce((sum, r) => sum + (r.cost_usd ?? 0), 0).toFixed(4)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="text-sm text-blue-800">
+                        <span className="font-semibold">Avg Latency:</span>{' '}
+                        <span className="font-bold">
+                          {Math.round(results.reduce((sum, r) => sum + (r.latency_ms ?? 0), 0) / results.length)}ms
+                        </span>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                      <div className="text-sm text-green-800">
+                        <span className="font-semibold">Total Tokens:</span>{' '}
+                        <span className="font-bold">
+                          {results.reduce((sum, r) => sum + (r.usage?.total_tokens ?? 0), 0)}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 )}

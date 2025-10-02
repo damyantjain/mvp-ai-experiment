@@ -47,7 +47,23 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-20 border-b bg-white backdrop-blur shadow-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between p-3">
-        <Link href="/" className="font-semibold text-gray-900">CoralCake</Link>
+        <div className="flex items-center gap-6">
+          <Link href="/" className="font-semibold text-gray-900">CoralCake</Link>
+          <nav className="hidden sm:flex items-center gap-4">
+            <Link 
+              href="/runner" 
+              className={`text-sm ${pathname === '/runner' ? 'text-orange-600 font-medium' : 'text-gray-600 hover:text-gray-900'}`}
+            >
+              Runner
+            </Link>
+            <Link 
+              href="/compare" 
+              className={`text-sm ${pathname === '/compare' ? 'text-orange-600 font-medium' : 'text-gray-600 hover:text-gray-900'}`}
+            >
+              Compare
+            </Link>
+          </nav>
+        </div>
         <div className="flex items-center gap-3">
           {userEmail ? (
             <>
